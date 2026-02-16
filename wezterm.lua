@@ -165,6 +165,7 @@ config.keys = {
 
 -- Misc:
 -- config.default_domain = 'Powershell'
+-- config.default_domain = 'WSL:Bash'
 config.default_domain = 'WSL:Zsh'
 config.enable_scroll_bar = true
 
