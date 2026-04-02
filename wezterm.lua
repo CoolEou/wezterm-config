@@ -150,6 +150,7 @@ config.keys = {
 -- Set default domain based on OS:
 if platform.is_win then
     config.default_domain = 'Powershell'
+    -- config.default_domain = 'WSL:Bash'
     -- config.default_domain = 'WSL:Zsh'
 end
 -- If not specified, the default domain is the system default
