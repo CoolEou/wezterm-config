@@ -1,10 +1,12 @@
 -- Pull in the wezterm API
 local wezterm = require 'wezterm'
 
+-- Get utils
+local platform = require('utils.platform')
+
 -- This will hold the configuration.
 local config = wezterm.config_builder()
 
--- This is where you actually apply your config choices.
 -- Window size(measured in characters):
 config.initial_cols = 122
 config.initial_rows = 27
@@ -47,8 +49,6 @@ wezterm.on("format-tab-title", function(tab)
 end)
 
 -- Colors:
--- config.color_scheme = 'Aci (Gogh)'
--- config.color_scheme = 'Arthur'
 config.color_scheme = 'Catppuccin Mocha'
 
 config.colors = {
@@ -89,37 +89,39 @@ config.integrated_title_button_color = "#fab387"
 config.integrated_title_button_style = "Gnome"
 
 -- Domains
-config.exec_domains = {
-    wezterm.exec_domain(
-        "Powershell",   -- domain name
-        function(cmd)             -- fixup function
-            cmd.args = { 'powershell.exe', '-NoLogo' }
-            return cmd
-        end
-    ),
-    wezterm.exec_domain(
-        "Command Promt",   -- domain name
-        function(cmd)             -- fixup function
-            cmd.args = { 'cmd.exe', '-NoLogo' }
-            return cmd
-        end
-    ),
-}
-
-config.wsl_domains = {
-    {
-      name = "WSL:Bash",
-      distribution = "Ubuntu", -- Replace with your actual WSL distro name
-      default_cwd = "~",
-      default_prog = { "bash", "-l" },
-    },
-    {
-      name = "WSL:Zsh",
-      distribution = "Ubuntu",
-      default_cwd = "~",
-      default_prog = { "zsh", "-l" },
-    },
-}
+if platform.is_win then
+    config.exec_domains = {
+        wezterm.exec_domain(
+            "Powershell",   -- domain name
+            function(cmd)             -- fixup function
+                cmd.args = { 'powershell.exe', '-NoLogo' }
+                return cmd
+            end
+        ),
+        wezterm.exec_domain(
+            "Command Promt",   -- domain name
+            function(cmd)             -- fixup function
+                cmd.args = { 'cmd.exe', '-NoLogo' }
+                return cmd
+            end
+        ),
+    }
+    
+    config.wsl_domains = {
+        {
+          name = "WSL:Bash",
+          distribution = "Ubuntu", -- Replace with your actual WSL distro name
+          default_cwd = "~",
+          default_prog = { "bash", "-l" },
+        },
+        {
+          name = "WSL:Zsh",
+          distribution = "Ubuntu",
+          default_cwd = "~",
+          default_prog = { "zsh", "-l" },
+        },
+    }
+ end
 
 -- Key Binds:
 config.keys = {
@@ -130,24 +132,6 @@ config.keys = {
         action = wezterm.action.ShowLauncherArgs {
             flags = "DOMAINS",
         },
-    },
-    {
-        -- Open a new Powershell tab
-        key = "1",
-        mods = "CTRL|ALT",
-        action = wezterm.action.SpawnTab { DomainName = "Powershell", },
-    },
-    {
-        -- Open a new Command Promt tab
-        key = "2",
-        mods = "CTRL|ALT",
-        action = wezterm.action.SpawnTab { DomainName = "Command Promt", },
-    },
-    {
-        -- Open a new WSL:Ubuntu tab
-        key = "3",
-        mods = "CTRL|ALT",
-        action = wezterm.action.SpawnTab { DomainName = "WSL:Ubuntu", },
     },
     {
         -- Copy
@@ -163,9 +147,14 @@ config.keys = {
     },
 }
 
+-- Set default domain based on OS:
+if platform.is_win then
+    config.default_domain = 'Powershell'
+    -- config.default_domain = 'WSL:Zsh'
+end
+-- If not specified, the default domain is the system default
+
 -- Misc:
--- config.default_domain = 'Powershell'
-config.default_domain = 'WSL:Zsh'
 config.enable_scroll_bar = true
 
 -- Finally, return the configuration to wezterm:
